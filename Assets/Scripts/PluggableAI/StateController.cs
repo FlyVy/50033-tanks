@@ -41,8 +41,10 @@ public class StateController : MonoBehaviour {
 
 	public void TransitionToState(State nextState)
 	{
+		if(currentState.name == "ChaseChaser" || currentState.name == "ChaseScanner" )gameObject.GetComponent<Animation>().Play(); //play animation when chaser and scanner tank is chasing
 		if (nextState == remainState) return;
 		currentState = nextState;
+
 		OnExitState();
 	}
 

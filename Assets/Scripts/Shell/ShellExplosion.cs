@@ -34,7 +34,10 @@ public class ShellExplosion : MonoBehaviour
             if (targetHealth == null) continue;
 
             float damage = CalculateDamage(targetRigidbody.position);
-            targetHealth.TakeDamage(damage);
+            bool death = targetHealth.TakeDamage(damage);
+            if(death){ // set the shooter of the shell to be invulnerable
+                this.transform.parent.gameObject.GetComponent<TankHealth>().SetInvulnerable(3);
+            }
         }
 
         m_ExplosionParticles.transform.parent = null;

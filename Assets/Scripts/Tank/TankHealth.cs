@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
+using System.Collections.Generic;
 
 public class TankHealth : MonoBehaviour
 {
@@ -9,6 +11,9 @@ public class TankHealth : MonoBehaviour
     public Color m_FullHealthColor = Color.green;  
     public Color m_ZeroHealthColor = Color.red;    
     public GameObject m_ExplosionPrefab;
+    public GameObject Shield; // Shield object to be instantiated when invulnerable
+    public bool Invulnerable; // boolean variable to check whether a tank will take damage
+    public GameObject current_Shield; // Holds the instance of a shield
     
     private AudioSource m_ExplosionAudio;          
     private ParticleSystem m_ExplosionParticles;   
@@ -33,15 +38,38 @@ public class TankHealth : MonoBehaviour
         SetHealthUI();
     }
 
-    public void TakeDamage(float amount)
+    public bool TakeDamage(float amount) // changed to bool function to return whether the damage kills or not
     {
-        // Adjust the tank's current health, update the UI based on the new health and check whether or not the tank is dead.
-        m_CurrentHealth -= amount;
+        if(!Invulnerable){ // only take damage when not invulnerable
+            // Adjust the tank's current health, update the UI based on the new health and check whether or not the tank is dead.
+            m_CurrentHealth -= amount;
 
-        SetHealthUI();
-        if (m_CurrentHealth <= 0f && !m_Dead) OnDeath();
+            SetHealthUI();
+            if (m_CurrentHealth <= 0f && !m_Dead) {
+                OnDeath();
+                return true;
+            }
+            return false;
+        }
+        return false;
     }
 
+    public void SetInvulnerable(int duration)
+    {
+        Invulnerable = true;
+        current_Shield = Instantiate(Shield, this.transform.position, Quaternion.identity);
+        current_Shield.GetComponent<AudioSource>().Play();
+        current_Shield.transform.parent = this.gameObject.transform;
+        current_Shield.transform.localScale = new Vector3(8.0f, 8.0f, 8.0f);
+        StartCoroutine(removeInvulnerable(duration));
+    }
+
+    IEnumerator removeInvulnerable(int duration)
+    {
+        yield return new WaitForSeconds(duration);
+        Invulnerable = false;
+        Destroy(current_Shield);
+    }
 
     private void SetHealthUI()
     {

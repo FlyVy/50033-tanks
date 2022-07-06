@@ -95,7 +95,7 @@ public class GameManager : MonoBehaviour
 
         m_MessageText.text = string.Empty;
 
-        while (!OneTankLeft()) yield return null;
+        while (!OneTankLeft() && PlayerAlive()) yield return null; //play ends when either the player dies, or the player is left alone
     }
 
 
@@ -103,10 +103,10 @@ public class GameManager : MonoBehaviour
     {
         DisableTankControl();
 
-        m_RoundWinner = null;
-
-        m_RoundWinner = GetRoundWinner();
+        if (m_RoundWinner == null) m_RoundWinner = GetRoundWinner();
         if (m_RoundWinner != null) m_RoundWinner.m_Wins++;
+
+        m_RoundWinner = null;
 
         m_GameWinner = GetGameWinner();
 
@@ -127,6 +127,17 @@ public class GameManager : MonoBehaviour
         }
 
         return numTanksLeft <= 1;
+    }
+
+    // Function to check whether the player is still alive
+    private bool PlayerAlive()
+    {
+        if (!m_Tanks[0].m_Instance.activeSelf){ // if the player is not alive, then randomly choose a winner and return false
+            int winner_index = Random.Range(1, 3);
+            m_RoundWinner = m_Tanks[winner_index]; 
+            return false;
+        }
+        return true;
     }
 
     private TankManager GetRoundWinner()
